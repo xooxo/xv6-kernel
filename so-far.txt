@@ -1,0 +1,4 @@
+[x] sleep
+[X] pingpong (pipe)
+[*] find
+ 
