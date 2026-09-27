@@ -35,7 +35,6 @@ ls(char *path)
     fprintf(2, "ls: cannot open %s\n", path);
     return;
   }
-
   if(fstat(fd, &st) < 0){
     fprintf(2, "ls: cannot stat %s\n", path);
     close(fd);

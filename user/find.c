@@ -31,10 +31,23 @@ find(char* path, char* fileToFind)
   struct dirent de;
   struct stat st;
 
+    if( strcmp(fmtname(path),fileToFind) == 0 ) {
+        printf("we found it! %s\n", buf);
+        return;     
+    }
+    else
+        printf("no match");
+    
+    printf("path: %s\n",fmtname(path));
+  if(strcmp(path,".") == 0 || strcmp(path,"..") == 0)
+    return;
+
   if((fd = open(path, O_RDONLY)) < 0){
     fprintf(2, "find: cannot open %s\n", path);
     return;
   }
+
+  printf("we pass open for %s\n!",path);
 
   if(fstat(fd, &st) < 0){
     fprintf(2, "find: cannot stat %s\n", path);
@@ -46,10 +59,11 @@ find(char* path, char* fileToFind)
   case T_DEVICE:
   case T_FILE:
     if( strcmp(fmtname(path),fileToFind) == 0 )
-        printf("%s\n", path);//, st.type, st.ino, (int) st.size);
+        printf(" found it %s\n", path);//, st.type, st.ino, (int) st.size);
     break;
 
   case T_DIR:
+    /**/
     if(strlen(path) + 1 + DIRSIZ + 1 > sizeof buf){
       printf("find: path too long\n");
       break;
@@ -67,12 +81,25 @@ find(char* path, char* fileToFind)
         continue;
       }
 
+      printf("fmtname(buf): %s\n",fmtname(buf));
+      if(*p == '.') {
+        continue;
+      }
+      else {
+        chdir(buf);
+        printf("chdir to %s\n",buf);
+        close(fd); // there will probably a mem leak if this is not here.
+        find(buf,fileToFind);
+
+      }
+
+      
+
       //printf("fmtname(buf): %s",fmtname(buf));
       if( strcmp(fmtname(buf),fileToFind) == 0 )
           printf("%s\n", buf);//, st.type, st.ino, (int) st.size);
     }
-    chdir(buf);
-    find(fmtname(buf),fileToFind);
+    
     break;
   }
   close(fd);
@@ -88,6 +115,7 @@ main(int argc, char *argv[])
     exit(-1);
   }
   printf("fileToFind: %s\n",argv[2]);
+  printf("path: %s\n",argv[1]);
   find(argv[1],argv[2]);
   exit(0);
 }
